@@ -83,7 +83,8 @@ let state = {
     stats: {
         timePlayed: 0,
         usedPromos: []
-    }
+    },
+    activeBonuses: [] // { id, type, multiplier, endTime }
 };
 
 // DOM Elements
@@ -191,30 +192,43 @@ function formatNumber(num) {
 }
 
 function getVibesPerClick() {
-    let bonus = 1;
-    for (const id in state.upgrades) {
+    let base = 1;
+    for (let id in state.upgrades) {
         const upgrade = UPGRADES.find(u => u.id == id);
-        if (upgrade) bonus += state.upgrades[id] * upgrade.clickBonus;
+        if (upgrade) base += upgrade.clickBonus * state.upgrades[id];
     }
     
-    // Prestige bonuses
-    const skillBonus = 1 + (state.prestige.skills.clickMaster * 0.5);
-    const comboBonus = state.combo.multiplier;
+    // Apply skills
+    base *= (1 + state.prestige.skills.clickMaster * 0.5);
     
-    return bonus * skillBonus * comboBonus;
+    // Apply combo
+    base *= state.combo.multiplier;
+
+    // Apply active bonuses
+    state.activeBonuses.forEach(b => {
+        if (b.type === 'click') base *= b.multiplier;
+    });
+    
+    return Math.floor(base);
+}Bonus * comboBonus;
 }
 
 function getVibesPerSecond() {
-    let income = 0;
-    for (const id in state.investments) {
+    let base = 0;
+    for (let id in state.investments) {
         const investment = INVESTMENTS.find(i => i.id == id);
-        if (investment) income += state.investments[id] * investment.income;
+        if (investment) base += investment.income * state.investments[id];
     }
     
-    // Prestige bonuses
-    const skillBonus = 1 + (state.prestige.skills.passiveIncome * 0.5);
+    // Apply skills
+    base *= (1 + state.prestige.skills.passiveIncome * 0.5);
+
+    // Apply active bonuses
+    state.activeBonuses.forEach(b => {
+        if (b.type === 'income') base *= b.multiplier;
+    });
     
-    return income * skillBonus;
+    return base;
 }
 
 function performPrestige() {
@@ -535,7 +549,9 @@ setInterval(() => {
     if (Math.random() < 0.01) { // 1% chance every second
         spawnGoldenAltushka();
     }
+}, 1000);
 
+setInterval(() => {
     const vps = getVibesPerSecond();
     if (vps > 0) {
         state.vibes += vps;
@@ -553,7 +569,27 @@ setInterval(() => {
         updateUI();
         saveGame();
     }
+    
+    // Update active bonuses
+    const now = Date.now();
+    const initialCount = state.activeBonuses.length;
+    state.activeBonuses = state.activeBonuses.filter(b => b.endTime > now);
+    if (state.activeBonuses.length !== initialCount) {
+        updateUI();
+    }
+    
+    state.stats.timePlayed += 1;
 }, 1000);
+
+function addBonus(type, multiplier, durationSec) {
+    state.activeBonuses.push({
+        id: Date.now(),
+        type: type,
+        multiplier: multiplier,
+        endTime: Date.now() + durationSec * 1000
+    });
+    updateUI();
+}
 
 // Tabs
 tabBtns.forEach(btn => {

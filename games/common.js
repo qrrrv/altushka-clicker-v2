@@ -39,6 +39,9 @@ const GameEngine = {
         } else if (gameId === 'flappy') {
             title.textContent = 'Летающая Альтушка';
             this.activeGame = FlappyGame;
+        } else if (gameId === 'memory') {
+            title.textContent = 'Найди Пару';
+            this.activeGame = MemoryMatchGame;
         }
         
         if (this.activeGame && this.activeGame.start) {
@@ -61,7 +64,20 @@ const GameEngine = {
         state.vibes += bonus;
         state.totalVibes += bonus;
         
-        alert(`Игра окончена! Ваш счет: ${score}. Вы заработали ${formatNumber(bonus)} вайбов!`);
+        let bonusMsg = `Игра окончена! Ваш счет: ${score}. Вы заработали ${formatNumber(bonus)} вайбов!`;
+        
+        // Give temporary click/income bonuses for good performance
+        if (score > 50) {
+            const bonusType = Math.random() > 0.5 ? 'click' : 'income';
+            const mult = 1.5 + (score / 500);
+            const duration = 30 + Math.min(score, 300);
+            if (typeof addBonus === 'function') {
+                addBonus(bonusType, mult, duration);
+                bonusMsg += `\n\nБОНУС: x${mult.toFixed(1)} к ${bonusType === 'click' ? 'клику' : 'доходу'} на ${duration} сек!`;
+            }
+        }
+        
+        alert(bonusMsg);
         
         updateUI();
         saveGame();
