@@ -58,7 +58,16 @@ let state = {
     upgrades: {}, // id: level
     investments: {}, // id: level
     achievements: [],
-    theme: 'light'
+    theme: 'light',
+    settings: {
+        volume: 50,
+        particles: true,
+        numbers: true
+    },
+    stats: {
+        timePlayed: 0,
+        usedPromos: []
+    }
 };
 
 // DOM Elements
@@ -78,6 +87,23 @@ const resetBtn = document.getElementById('reset-game');
 const tabBtns = document.querySelectorAll('.tab-btn');
 const tabContents = document.querySelectorAll('.tab-content');
 
+// New DOM Elements
+const statTotalClicks = document.getElementById('stat-total-clicks');
+const statTotalVibes = document.getElementById('stat-total-vibes');
+const statLevel = document.getElementById('stat-level');
+const statUpgrades = document.getElementById('stat-upgrades');
+const statInvestments = document.getElementById('stat-investments');
+const statAchievements = document.getElementById('stat-achievements');
+const statTime = document.getElementById('stat-time');
+
+const volumeControl = document.getElementById('volume-control');
+const particlesToggle = document.getElementById('particles-toggle');
+const numbersToggle = document.getElementById('numbers-toggle');
+const promoInput = document.getElementById('promo-input');
+const applyPromoBtn = document.getElementById('apply-promo');
+const exportBtn = document.getElementById('export-save');
+const importBtn = document.getElementById('import-save');
+
 // Audio Context
 let audioCtx = null;
 
@@ -93,7 +119,8 @@ function playSound(type) {
     const gain = audioCtx.createGain();
     osc.connect(gain);
     gain.connect(audioCtx.destination);
-    gain.gain.setValueAtTime(0.1, audioCtx.currentTime);
+    const volume = (state.settings?.volume || 50) / 500; // Scale volume
+    gain.gain.setValueAtTime(volume, audioCtx.currentTime);
 
     if (type === 'click') {
         osc.frequency.setValueAtTime(800, audioCtx.currentTime);
@@ -159,6 +186,22 @@ function updateUI() {
     
     renderShop();
     if (window.renderAchievements) window.renderAchievements(state);
+    updateStatsUI();
+}
+
+function updateStatsUI() {
+    if (!statTotalClicks) return;
+    statTotalClicks.textContent = formatNumber(state.clicks);
+    statTotalVibes.textContent = formatNumber(state.totalVibes);
+    statLevel.textContent = state.level;
+    statUpgrades.textContent = Object.values(state.upgrades).reduce((a, b) => a + b, 0);
+    statInvestments.textContent = Object.values(state.investments).reduce((a, b) => a + b, 0);
+    statAchievements.textContent = state.achievements?.length || 0;
+    
+    const hours = Math.floor(state.stats.timePlayed / 3600);
+    const mins = Math.floor((state.stats.timePlayed % 3600) / 60);
+    const secs = state.stats.timePlayed % 60;
+    statTime.textContent = `${hours > 0 ? hours + 'ч ' : ''}${mins > 0 ? mins + 'м ' : ''}${secs}с`;
 }
 
 function renderShop() {
@@ -232,6 +275,7 @@ function buyInvestment(id) {
 }
 
 function createFloatingNumber(x, y, val) {
+    if (state.settings && !state.settings.numbers) return;
     const el = document.createElement('div');
     el.className = 'floating-number';
     el.textContent = '+' + formatNumber(val);
@@ -242,6 +286,7 @@ function createFloatingNumber(x, y, val) {
 }
 
 function createParticles(x, y) {
+    if (state.settings && !state.settings.particles) return;
     for (let i = 0; i < 8; i++) {
         const p = document.createElement('div');
         p.className = 'particle';
@@ -299,8 +344,9 @@ clickButton.onclick = (e) => {
     saveGame();
 };
 
-// Auto-click loop
+// Game loop (1s)
 setInterval(() => {
+    state.stats.timePlayed++;
     const vps = getVibesPerSecond();
     if (vps > 0) {
         state.vibes += vps;
@@ -337,6 +383,68 @@ themeToggle.onclick = () => {
     saveGame();
 };
 
+// Settings Handlers
+volumeControl.oninput = (e) => {
+    state.settings.volume = e.target.value;
+    saveGame();
+};
+
+particlesToggle.onchange = (e) => {
+    state.settings.particles = e.target.checked;
+    saveGame();
+};
+
+numbersToggle.onchange = (e) => {
+    state.settings.numbers = e.target.checked;
+    saveGame();
+};
+
+const PROMOS = {
+    'MANUS': { vibes: 5000, desc: 'Подарок от Manus!' },
+    'ALTUSHKA': { vibes: 1000, desc: 'Бонус для новичков' },
+    'BEBRA': { vibes: 228, desc: 'Чисто на чил' }
+};
+
+applyPromoBtn.onclick = () => {
+    const code = promoInput.value.toUpperCase();
+    if (state.stats.usedPromos.includes(code)) {
+        alert('Вы уже использовали этот код!');
+        return;
+    }
+    if (PROMOS[code]) {
+        state.vibes += PROMOS[code].vibes;
+        state.totalVibes += PROMOS[code].vibes;
+        state.stats.usedPromos.push(code);
+        alert(`Успешно! ${PROMOS[code].desc}: +${PROMOS[code].vibes} вайбов`);
+        promoInput.value = '';
+        updateUI();
+        saveGame();
+    } else {
+        alert('Неверный промокод!');
+    }
+};
+
+exportBtn.onclick = () => {
+    const data = btoa(JSON.stringify(state));
+    navigator.clipboard.writeText(data).then(() => {
+        alert('Код сохранения скопирован в буфер обмена!');
+    });
+};
+
+importBtn.onclick = () => {
+    const code = prompt('Вставьте код сохранения:');
+    if (code) {
+        try {
+            const decoded = JSON.parse(atob(code));
+            state = decoded;
+            saveGame();
+            location.reload();
+        } catch (e) {
+            alert('Ошибка при импорте!');
+        }
+    }
+};
+
 // Reset
 resetBtn.onclick = () => {
     if (confirm('Вы уверены? Это удалит весь прогресс!')) {
@@ -352,8 +460,20 @@ function saveGame() {
 function loadGame() {
     const saved = localStorage.getItem('altushka_save');
     if (saved) {
-        state = { ...state, ...JSON.parse(saved) };
+        const loadedState = JSON.parse(saved);
+        // Deep merge for settings and stats
+        state = { 
+            ...state, 
+            ...loadedState,
+            settings: { ...state.settings, ...loadedState.settings },
+            stats: { ...state.stats, ...loadedState.stats }
+        };
         document.body.className = state.theme;
+        
+        // Update UI elements to match state
+        if (volumeControl) volumeControl.value = state.settings.volume;
+        if (particlesToggle) particlesToggle.checked = state.settings.particles;
+        if (numbersToggle) numbersToggle.checked = state.settings.numbers;
     }
     updateUI();
 }

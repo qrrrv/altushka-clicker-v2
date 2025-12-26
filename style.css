@@ -384,6 +384,76 @@ header {
     color: var(--text-muted);
 }
 
+.stats-container, .settings-container {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    padding: 10px;
+}
+
+.stat-row {
+    display: flex;
+    justify-content: space-between;
+    padding: 10px;
+    background: var(--bg-gradient);
+    border-radius: 8px;
+    border: 1px solid var(--border);
+}
+
+.setting-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px;
+    background: var(--bg-gradient);
+    border-radius: 8px;
+    border: 1px solid var(--border);
+}
+
+.setting-item label {
+    font-weight: 600;
+    font-size: 0.9rem;
+}
+
+.promo-input-group {
+    display: flex;
+    gap: 5px;
+}
+
+.promo-input-group input {
+    padding: 5px 10px;
+    border-radius: 6px;
+    border: 1px solid var(--border);
+    background: var(--card-bg);
+    color: var(--text-main);
+    width: 120px;
+}
+
+.promo-input-group button {
+    padding: 5px 15px;
+    background: var(--accent);
+    color: white;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+}
+
+.secondary-btn {
+    padding: 12px;
+    background: var(--card-bg);
+    border: 1px solid var(--accent);
+    color: var(--accent);
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: 600;
+    transition: all 0.2s;
+}
+
+.secondary-btn:hover {
+    background: var(--accent);
+    color: white;
+}
+
 @keyframes floatUp {
     0% { 
         transform: translateY(0) scale(1);

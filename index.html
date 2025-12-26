@@ -61,6 +61,8 @@
                         <button class="tab-btn active" data-tab="upgrades">Улучшения</button>
                         <button class="tab-btn" data-tab="investments">Инвестиции</button>
                         <button class="tab-btn" data-tab="achievements">Достижения</button>
+                        <button class="tab-btn" data-tab="stats">Статистика</button>
+                        <button class="tab-btn" data-tab="settings">Настройки</button>
                     </div>
 
                     <div id="upgrades-tab" class="tab-content active">
@@ -73,6 +75,44 @@
 
                     <div id="achievements-tab" class="tab-content">
                         <div id="achievements-list" class="item-list"></div>
+                    </div>
+
+                    <div id="stats-tab" class="tab-content">
+                        <div class="stats-container">
+                            <div class="stat-row"><span>Всего кликов:</span> <span id="stat-total-clicks">0</span></div>
+                            <div class="stat-row"><span>Всего заработано:</span> <span id="stat-total-vibes">0</span></div>
+                            <div class="stat-row"><span>Текущий уровень:</span> <span id="stat-level">1</span></div>
+                            <div class="stat-row"><span>Куплено улучшений:</span> <span id="stat-upgrades">0</span></div>
+                            <div class="stat-row"><span>Куплено инвестиций:</span> <span id="stat-investments">0</span></div>
+                            <div class="stat-row"><span>Открыто достижений:</span> <span id="stat-achievements">0</span></div>
+                            <div class="stat-row"><span>Время в игре:</span> <span id="stat-time">0с</span></div>
+                        </div>
+                    </div>
+
+                    <div id="settings-tab" class="tab-content">
+                        <div class="settings-container">
+                            <div class="setting-item">
+                                <label>Громкость звука</label>
+                                <input type="range" id="volume-control" min="0" max="100" value="50">
+                            </div>
+                            <div class="setting-item">
+                                <label>Эффекты частиц</label>
+                                <input type="checkbox" id="particles-toggle" checked>
+                            </div>
+                            <div class="setting-item">
+                                <label>Всплывающие числа</label>
+                                <input type="checkbox" id="numbers-toggle" checked>
+                            </div>
+                            <div class="setting-item">
+                                <label>Промокод</label>
+                                <div class="promo-input-group">
+                                    <input type="text" id="promo-input" placeholder="Введите код...">
+                                    <button id="apply-promo">ОК</button>
+                                </div>
+                            </div>
+                            <button id="export-save" class="secondary-btn">Экспорт сохранения</button>
+                            <button id="import-save" class="secondary-btn">Импорт сохранения</button>
+                        </div>
                     </div>
                 </div>
             </div>
