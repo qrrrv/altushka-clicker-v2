@@ -1,0 +1,312 @@
+:root {
+    --bg-gradient: linear-gradient(to bottom right, #fff5f7, #f0f7ff);
+    --card-bg: #ffffff;
+    --text-main: #1e293b;
+    --text-muted: #64748b;
+    --accent: #ec4899;
+    --accent-hover: #db2777;
+    --border: #fce7f3;
+    --shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1);
+}
+
+body.dark {
+    --bg-gradient: #020617;
+    --card-bg: #0f172a;
+    --text-main: #f8fafc;
+    --text-muted: #94a3b8;
+    --accent: #f472b6;
+    --accent-hover: #ec4899;
+    --border: #1e293b;
+    --shadow: 0 4px 6px -1px rgb(0 0 0 / 0.3);
+}
+
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+}
+
+body {
+    background: var(--bg-gradient);
+    color: var(--text-main);
+    min-height: 100vh;
+    transition: background 0.3s, color 0.3s;
+}
+
+.container {
+    max-width: 1000px;
+    margin: 0 auto;
+    padding: 20px;
+}
+
+header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding-bottom: 20px;
+    border-bottom: 1px solid var(--border);
+    margin-bottom: 30px;
+}
+
+.header-content {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+
+.logo {
+    font-size: 2.5rem;
+}
+
+.title-group h1 {
+    font-size: 1.5rem;
+    color: var(--accent);
+}
+
+.title-group p {
+    font-size: 0.875rem;
+    color: var(--text-muted);
+}
+
+.header-actions {
+    display: flex;
+    gap: 10px;
+}
+
+.header-actions button {
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    padding: 8px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 1.2rem;
+    transition: transform 0.1s;
+}
+
+.header-actions button:hover {
+    transform: scale(1.05);
+}
+
+.game-layout {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 30px;
+}
+
+@media (max-width: 768px) {
+    .game-layout {
+        grid-template-columns: 1fr;
+    }
+}
+
+.stats-card {
+    background: var(--card-bg);
+    padding: 20px;
+    border-radius: 16px;
+    box-shadow: var(--shadow);
+    text-align: center;
+    margin-bottom: 20px;
+    border: 1px solid var(--border);
+}
+
+.stat-item {
+    margin-bottom: 5px;
+}
+
+.stat-label {
+    font-size: 1.1rem;
+    color: var(--text-muted);
+}
+
+.stat-value {
+    font-size: 2.5rem;
+    font-weight: bold;
+    color: var(--accent);
+}
+
+.stat-sub {
+    display: flex;
+    justify-content: center;
+    gap: 20px;
+    font-size: 0.9rem;
+    color: var(--text-muted);
+}
+
+.click-area {
+    position: relative;
+    display: flex;
+    justify-content: center;
+    margin: 40px 0;
+}
+
+#click-button {
+    background: none;
+    border: none;
+    cursor: pointer;
+    transition: transform 0.1s;
+    outline: none;
+}
+
+#click-button:active {
+    transform: scale(0.95);
+}
+
+#altushka-img {
+    width: 280px;
+    height: 280px;
+    object-fit: cover;
+    border-radius: 50%;
+    border: 8px solid var(--card-bg);
+    box-shadow: var(--shadow);
+}
+
+.loyalty-section {
+    background: var(--card-bg);
+    padding: 15px;
+    border-radius: 12px;
+    border: 1px solid var(--border);
+}
+
+.loyalty-header {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 8px;
+    font-weight: 600;
+    font-size: 0.9rem;
+}
+
+.progress-bar {
+    height: 12px;
+    background: var(--border);
+    border-radius: 6px;
+    overflow: hidden;
+}
+
+.progress-fill {
+    height: 100%;
+    background: var(--accent);
+    width: 0%;
+    transition: width 0.3s;
+}
+
+.shop-section {
+    background: var(--card-bg);
+    border-radius: 16px;
+    box-shadow: var(--shadow);
+    border: 1px solid var(--border);
+    display: flex;
+    flex-direction: column;
+    max-height: 700px;
+}
+
+.tabs {
+    display: flex;
+    border-bottom: 1px solid var(--border);
+}
+
+.tab-btn {
+    flex: 1;
+    padding: 15px;
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: var(--text-muted);
+    font-weight: 600;
+    transition: color 0.2s;
+}
+
+.tab-btn.active {
+    color: var(--accent);
+    border-bottom: 2px solid var(--accent);
+}
+
+.tab-content {
+    display: none;
+    padding: 15px;
+    overflow-y: auto;
+}
+
+.tab-content.active {
+    display: block;
+}
+
+.item-list {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.shop-item {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    padding: 12px;
+    border-radius: 10px;
+    border: 1px solid var(--border);
+    background: var(--bg-gradient);
+    cursor: pointer;
+    transition: transform 0.1s, opacity 0.2s;
+}
+
+.shop-item:hover:not(.disabled) {
+    transform: translateX(5px);
+}
+
+.shop-item.disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.item-icon {
+    font-size: 1.5rem;
+    background: var(--card-bg);
+    width: 45px;
+    height: 45px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 8px;
+}
+
+.item-info {
+    flex: 1;
+}
+
+.item-name {
+    font-weight: bold;
+    display: block;
+}
+
+.item-desc {
+    font-size: 0.8rem;
+    color: var(--text-muted);
+}
+
+.item-cost {
+    font-weight: bold;
+    color: var(--accent);
+}
+
+.item-level {
+    font-size: 0.8rem;
+    background: var(--accent);
+    color: white;
+    padding: 2px 6px;
+    border-radius: 4px;
+}
+
+.floating-number {
+    position: absolute;
+    color: var(--accent);
+    font-weight: bold;
+    font-size: 1.5rem;
+    pointer-events: none;
+    animation: floatUp 1s ease-out forwards;
+    z-index: 100;
+}
+
+@keyframes floatUp {
+    0% { transform: translateY(0); opacity: 1; }
+    100% { transform: translateY(-100px); opacity: 0; }
+}

@@ -1,113 +1,24 @@
-# Altushka Clicker V2 🎮
+# Altushka Clicker v2 (Vanilla JS Edition)
 
-Улучшенная версия популярной игры-кликера с красивым интерфейсом, новыми функциями и вашими фотографиями!
+Altushka Clicker is a lightweight, entertaining web-based incremental game. This version has been completely refactored from its original React-based architecture into a streamlined implementation using pure **HTML5**, **CSS3**, and **Vanilla JavaScript**. This transition ensures maximum compatibility and performance across all modern web browsers without the need for complex build tools or dependencies.
 
-## 🎯 Особенности
+The core gameplay revolves around the accumulation of **Vibes**, the primary in-game currency. Players can increase their earnings through two main mechanisms: manual clicking and passive investments. As players progress, they unlock new visual content and reach higher loyalty levels, reflecting their status within the game's ecosystem.
 
-- **Интерактивный кликер** - Кликай на фотографию и зарабатывай Vibes!
-- **Система улучшений** - 10+ различных улучшений для увеличения урона за клик
-- **Бизнес инвестиции** - 6+ инвестиций для пассивного дохода
-- **Система уровней** - Повышай уровень через систему лояльности
-- **Темная/Светлая тема** - Выбирай удобный для тебя режим
-- **Сохранение прогресса** - Автоматическое сохранение в localStorage
-- **Экспорт данных** - Скачивай свой прогресс в JSON
-- **Красивый UI** - Современный интерфейс с плавными анимациями
+### Game Mechanics and Features
 
-## 🚀 Быстрый старт
+The game features a robust progression system designed to keep players engaged through various upgrades and strategic investments. The following table outlines the primary components of the game:
 
-### Требования
-- Node.js 18+
-- pnpm (или npm/yarn)
+| Feature | Description |
+| :--- | :--- |
+| **Vibes** | The central currency earned through clicking and passive income. |
+| **Upgrades** | Equipment such as RGB mats and mechanical keyboards that boost vibes per click. |
+| **Investments** | Social media platforms like Telegram and Twitch that provide automated income. |
+| **Loyalty Levels** | A progression metric that unlocks new character photographs as it increases. |
+| **Theme Support** | A toggleable interface allowing users to switch between light and dark modes. |
+| **Persistence** | Automatic state management using browser LocalStorage to preserve progress. |
 
-### Установка
+### Technical Implementation
 
-```bash
-# Перейди в папку проекта
-cd altushka-clicker-v2
+The project utilizes modern web standards to deliver a responsive and interactive experience. **CSS Custom Properties** are employed for seamless theme switching, while **Flexbox** and **Grid** layouts ensure the interface adapts to various screen sizes. The game logic is handled by a modular JavaScript architecture that manages state, audio feedback via the **Web Audio API**, and dynamic UI updates.
 
-# Установи зависимости
-pnpm install
-
-# Запусти dev сервер
-pnpm dev
-```
-
-Откройся в браузере: `http://localhost:3000`
-
-## 📁 Структура проекта
-
-```
-altushka-clicker-v2/
-├── client/
-│   ├── public/
-│   │   └── images/          # Фотографии для кликера
-│   └── src/
-│       ├── pages/
-│       │   └── Home.tsx      # Главная страница с игрой
-│       ├── components/       # Переиспользуемые компоненты
-│       ├── App.tsx           # Главный компонент
-│       └── index.css         # Глобальные стили
-├── package.json
-└── vite.config.ts
-```
-
-## 🎮 Как играть
-
-1. **Кликай на фотографию** - Получай Vibes за каждый клик
-2. **Покупай улучшения** - Увеличивай урон за клик
-3. **Инвестируй в бизнес** - Получай пассивный доход
-4. **Повышай уровень** - Заполняй шкалу лояльности
-5. **Экспортируй прогресс** - Сохраняй свои достижения
-
-## 🛠️ Технологический стек
-
-- **React 19** - UI библиотека
-- **TypeScript** - Типизированный JavaScript
-- **Tailwind CSS 4** - Утилиты для стилизации
-- **shadcn/ui** - Готовые компоненты
-- **Vite** - Быстрый сборщик
-- **Wouter** - Маршрутизация
-
-## 📦 Сборка для продакшена
-
-```bash
-pnpm build
-```
-
-Собранные файлы будут в папке `dist/`
-
-## 💾 Сохранение и загрузка
-
-Игра автоматически сохраняет прогресс в localStorage браузера. Ты можешь:
-- **Экспортировать** свой прогресс в JSON файл
-- **Сбросить** игру и начать заново (с подтверждением)
-
-## 🎨 Кастомизация
-
-### Добавить новые фотографии
-1. Добавь фотографии в папку `client/public/images/`
-2. Обнови массив `PHOTOS` в `client/src/pages/Home.tsx`
-
-### Изменить цвета
-Отредактируй переменные в `client/src/index.css`:
-```css
-:root {
-  --primary: oklch(0.65 0.2 330);
-  /* ... другие переменные */
-}
-```
-
-### Добавить новые улучшения
-Отредактируй массив `UPGRADES` в `client/src/pages/Home.tsx`
-
-## 📝 Лицензия
-
-MIT
-
-## 🤝 Поддержка
-
-Если у тебя есть вопросы или предложения, создай issue в репозитории!
-
----
-
-**Создано с ❤️ для Altushka**
+To launch the game, simply open the `index.html` file in any standard web browser. No installation or server configuration is required, making it an ideal example of a portable, client-side web application.
