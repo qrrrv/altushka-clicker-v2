@@ -66,7 +66,7 @@
                         <button class="tab-btn" data-tab="investments">Инвестиции</button>
                         <button class="tab-btn" data-tab="achievements">Достижения</button>
                         <button class="tab-btn" data-tab="skills">Навыки</button>
-                        <button class="tab-btn" data-tab="minigame">Мини-игра</button>
+                        <button class="tab-btn" data-tab="minigame">Мини-игры</button>
                         <button class="tab-btn" data-tab="stats">Статистика</button>
                     </div>
 
@@ -120,14 +120,51 @@
 
                     <div id="minigame-tab" class="tab-content">
                         <div class="minigame-container">
-                            <h3>Поймай Альтушку!</h3>
-                            <p>Нажимай на появляющиеся иконки, чтобы заработать бонусы.</p>
-                            <div id="minigame-area" class="minigame-area">
-                                <button id="start-minigame" class="prestige-btn active">Начать игру</button>
+                            <div id="game-selection" class="game-selection">
+                                <h3>Выберите игру</h3>
+                                <div class="game-grid">
+                                    <div class="game-card" onclick="selectGame('catch_heart')">
+                                        <div class="game-icon">💖</div>
+                                        <div class="game-info">
+                                            <h4>Поймай Альтушку</h4>
+                                            <p>Собирай сердечки, избегай бомб!</p>
+                                        </div>
+                                    </div>
+                                    <div class="game-card" onclick="selectGame('mountain_car')">
+                                        <div class="game-icon">🚗</div>
+                                        <div class="game-info">
+                                            <h4>Горная Машина</h4>
+                                            <p>Езди по горам и не перевернись!</p>
+                                        </div>
+                                    </div>
+                                    <div class="game-card" onclick="selectGame('space_shooter')">
+                                        <div class="game-icon">🚀</div>
+                                        <div class="game-info">
+                                            <h4>Космический Бой</h4>
+                                            <p>Сбивай врагов и уклоняйся от пуль!</p>
+                                        </div>
+                                    </div>
+                                    <div class="game-card" onclick="selectGame('flappy')">
+                                        <div class="game-icon">🐦</div>
+                                        <div class="game-info">
+                                            <h4>Летающая Альтушка</h4>
+                                            <p>Лети сквозь препятствия!</p>
+                                        </div>
+                                    </div>
+                                </div>
                             </div>
-                            <div class="minigame-stats">
-                                <span>Счет: <span id="minigame-score">0</span></span>
-                                <span>Время: <span id="minigame-timer">30</span>с</span>
+                            <div id="game-container" class="game-container" style="display: none;">
+                                <div class="game-header">
+                                    <button id="back-to-menu" class="secondary-btn">⬅ Назад</button>
+                                    <h3 id="current-game-title">Игра</h3>
+                                </div>
+                                <div id="minigame-area" class="minigame-area">
+                                    <!-- Game canvas or elements will be injected here -->
+                                </div>
+                                <div class="minigame-stats">
+                                    <span>Счет: <span id="minigame-score">0</span></span>
+                                    <span id="minigame-timer-container">Время: <span id="minigame-timer">30</span>с</span>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -246,6 +283,11 @@
         </div>
     </div>
     <script src="achievements.js"></script>
+    <script src="games/common.js"></script>
+    <script src="games/catch_heart.js"></script>
+    <script src="games/mountain_car.js"></script>
+    <script src="games/space_shooter.js"></script>
+    <script src="games/flappy_altushka.js"></script>
     <script src="script.js"></script>
 </body>
 </html>

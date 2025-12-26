@@ -837,16 +837,63 @@ body.sakura {
 
 .minigame-area {
     width: 100%;
-    height: 300px;
-    background: var(--bg-gradient);
-    border: 2px solid var(--border);
-    border-radius: var(--radius);
+    height: 400px;
+    background: rgba(0, 0, 0, 0.05);
+    border-radius: 12px;
     position: relative;
-    margin: 20px 0;
     overflow: hidden;
+    margin: 15px 0;
+    border: 2px solid var(--border);
+}
+
+.game-selection {
+    padding: 10px;
+}
+
+.game-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 15px;
+    margin-top: 15px;
+}
+
+.game-card {
     display: flex;
     align-items: center;
-    justify-content: center;
+    padding: 15px;
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.game-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    border-color: var(--accent);
+}
+
+.game-icon {
+    font-size: 32px;
+    margin-right: 15px;
+}
+
+.game-info h4 {
+    margin: 0 0 5px 0;
+}
+
+.game-info p {
+    margin: 0;
+    font-size: 0.9em;
+    color: var(--text-muted);
+}
+
+.game-header {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    margin-bottom: 10px;
 }
 
 .minigame-target {
@@ -856,10 +903,33 @@ body.sakura {
     user-select: none;
     animation: popIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
     transition: transform 0.1s;
+    z-index: 10;
 }
 
 .minigame-target:active {
     transform: scale(0.8);
+}
+
+.minigame-bomb {
+    position: absolute;
+    font-size: 2.5rem;
+    cursor: pointer;
+    user-select: none;
+    z-index: 10;
+}
+
+.minigame-snowflake {
+    position: absolute;
+    font-size: 2.5rem;
+    cursor: pointer;
+    user-select: none;
+    z-index: 10;
+}
+
+canvas#game-canvas {
+    width: 100%;
+    height: 100%;
+    display: block;
 }
 
 @keyframes popIn {
