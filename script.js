@@ -126,6 +126,17 @@ const applyPromoBtn = document.getElementById('apply-promo');
 const exportBtn = document.getElementById('export-save');
 const importBtn = document.getElementById('import-save');
 
+// Minigame Elements
+const minigameArea = document.getElementById('minigame-area');
+const startMinigameBtn = document.getElementById('start-minigame');
+const minigameScoreDisplay = document.getElementById('minigame-score');
+const minigameTimerDisplay = document.getElementById('minigame-timer');
+
+let minigameActive = false;
+let minigameScore = 0;
+let minigameTimeLeft = 30;
+let minigameInterval = null;
+
 // Audio Context
 let audioCtx = null;
 
@@ -136,14 +147,18 @@ function initAudio() {
 }
 
 function playSound(type) {
+    initAudio();
     if (!audioCtx) return;
+    if (audioCtx.state === 'suspended') {
+        audioCtx.resume();
+    }
     const volume = (state.settings?.volume || 50) / 500;
     const soundSet = state.settings.soundSet || 'classic';
 
-    const playOsc = (freqs, duration, type = 'sine') => {
+    const playOsc = (freqs, duration, oscType = 'sine') => {
         const osc = audioCtx.createOscillator();
         const gain = audioCtx.createGain();
-        osc.type = type;
+        osc.type = oscType;
         osc.connect(gain);
         gain.connect(audioCtx.destination);
         gain.gain.setValueAtTime(volume, audioCtx.currentTime);
@@ -254,10 +269,10 @@ function buySkill(skillId) {
 }
 
 function updateUI() {
-    vibesDisplay.textContent = formatNumber(state.vibes);
-    vpcDisplay.textContent = formatNumber(getVibesPerClick());
-    vpsDisplay.textContent = formatNumber(getVibesPerSecond());
-    levelDisplay.textContent = state.level;
+    if (vibesDisplay) vibesDisplay.textContent = formatNumber(state.vibes);
+    if (vpcDisplay) vpcDisplay.textContent = formatNumber(getVibesPerClick());
+    if (vpsDisplay) vpsDisplay.textContent = formatNumber(getVibesPerSecond());
+    if (levelDisplay) levelDisplay.textContent = state.level;
     
     const loyaltyPercent = (state.loyalty / LOYALTY_FOR_LEVEL_UP) * 100;
     loyaltyPercentDisplay.textContent = Math.floor(loyaltyPercent) + '%';
@@ -566,9 +581,14 @@ window.onclick = (e) => {
 // Theme
 themeSelect.onchange = (e) => {
     state.theme = e.target.value;
-    document.body.className = state.theme;
+    applyTheme(state.theme);
     saveGame();
 };
+
+function applyTheme(themeName) {
+    document.body.className = themeName;
+    // Force update for any theme-specific UI elements if needed
+}
 
 // Settings Handlers
 volumeControl.oninput = (e) => {
@@ -658,9 +678,11 @@ function loadGame() {
             ...state, 
             ...loadedState,
             settings: { ...state.settings, ...loadedState.settings },
-            stats: { ...state.stats, ...loadedState.stats }
+            stats: { ...state.stats, ...loadedState.stats },
+            prestige: { ...state.prestige, ...loadedState.prestige },
+            combo: { ...state.combo }
         };
-        document.body.className = state.theme;
+        applyTheme(state.theme);
         if (themeSelect) themeSelect.value = state.theme;
         
         // Update UI elements to match state
@@ -671,5 +693,78 @@ function loadGame() {
     }
     updateUI();
 }
+
+// Minigame Logic
+function startMinigame() {
+    if (minigameActive) return;
+    
+    minigameActive = true;
+    minigameScore = 0;
+    minigameTimeLeft = 30;
+    minigameScoreDisplay.textContent = '0';
+    minigameTimerDisplay.textContent = '30';
+    startMinigameBtn.style.display = 'none';
+    
+    minigameInterval = setInterval(() => {
+        minigameTimeLeft--;
+        minigameTimerDisplay.textContent = minigameTimeLeft;
+        
+        if (minigameTimeLeft <= 0) {
+            endMinigame();
+        } else {
+            spawnMinigameTarget();
+        }
+    }, 1000);
+    
+    spawnMinigameTarget();
+}
+
+function spawnMinigameTarget() {
+    if (!minigameActive) return;
+    
+    const target = document.createElement('div');
+    target.className = 'minigame-target';
+    target.innerHTML = '💖';
+    
+    const areaRect = minigameArea.getBoundingClientRect();
+    const x = Math.random() * (areaRect.width - 50);
+    const y = Math.random() * (areaRect.height - 50);
+    
+    target.style.left = x + 'px';
+    target.style.top = y + 'px';
+    
+    target.onclick = () => {
+        minigameScore++;
+        minigameScoreDisplay.textContent = minigameScore;
+        playSound('click');
+        target.remove();
+    };
+    
+    minigameArea.appendChild(target);
+    
+    setTimeout(() => {
+        if (target.parentNode) target.remove();
+    }, 1500);
+}
+
+function endMinigame() {
+    minigameActive = false;
+    clearInterval(minigameInterval);
+    
+    const bonus = minigameScore * (getVibesPerSecond() * 10 + 100);
+    state.vibes += bonus;
+    state.totalVibes += bonus;
+    
+    alert(`Игра окончена! Ваш счет: ${minigameScore}. Вы заработали ${formatNumber(bonus)} вайбов!`);
+    
+    startMinigameBtn.style.display = 'block';
+    minigameArea.innerHTML = '';
+    minigameArea.appendChild(startMinigameBtn);
+    
+    updateUI();
+    saveGame();
+}
+
+startMinigameBtn.onclick = startMinigame;
 
 loadGame();

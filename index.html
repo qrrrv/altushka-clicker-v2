@@ -66,6 +66,7 @@
                         <button class="tab-btn" data-tab="investments">Инвестиции</button>
                         <button class="tab-btn" data-tab="achievements">Достижения</button>
                         <button class="tab-btn" data-tab="skills">Навыки</button>
+                        <button class="tab-btn" data-tab="minigame">Мини-игра</button>
                         <button class="tab-btn" data-tab="stats">Статистика</button>
                     </div>
 
@@ -113,6 +114,20 @@
                                     <span class="item-desc">Шанс крит. клика (x10)</span>
                                 </div>
                                 <div class="item-cost">2 Очка</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div id="minigame-tab" class="tab-content">
+                        <div class="minigame-container">
+                            <h3>Поймай Альтушку!</h3>
+                            <p>Нажимай на появляющиеся иконки, чтобы заработать бонусы.</p>
+                            <div id="minigame-area" class="minigame-area">
+                                <button id="start-minigame" class="prestige-btn active">Начать игру</button>
+                            </div>
+                            <div class="minigame-stats">
+                                <span>Счет: <span id="minigame-score">0</span></span>
+                                <span>Время: <span id="minigame-timer">30</span>с</span>
                             </div>
                         </div>
                     </div>
