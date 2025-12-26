@@ -59,10 +59,26 @@ let state = {
     investments: {}, // id: level
     achievements: [],
     theme: 'light',
+    prestige: {
+        points: 0,
+        totalPoints: 0,
+        count: 0,
+        skills: {
+            clickMaster: 0,
+            passiveIncome: 0,
+            luck: 0
+        }
+    },
+    combo: {
+        value: 0,
+        multiplier: 1,
+        lastClick: 0
+    },
     settings: {
         volume: 50,
         particles: true,
-        numbers: true
+        numbers: true,
+        soundSet: 'classic'
     },
     stats: {
         timePlayed: 0,
@@ -99,11 +115,12 @@ const profileRank = document.getElementById('profile-rank');
 const settingsModal = document.getElementById('settings-modal');
 const openSettingsBtn = document.getElementById('open-settings');
 const closeSettingsBtn = document.getElementById('close-settings');
-const themeToggleBtn = document.getElementById('theme-toggle-btn');
+const themeSelect = document.getElementById('theme-select');
 
 const volumeControl = document.getElementById('volume-control');
 const particlesToggle = document.getElementById('particles-toggle');
 const numbersToggle = document.getElementById('numbers-toggle');
+const soundSetSelect = document.getElementById('sound-set-select');
 const promoInput = document.getElementById('promo-input');
 const applyPromoBtn = document.getElementById('apply-promo');
 const exportBtn = document.getElementById('export-save');
@@ -120,31 +137,40 @@ function initAudio() {
 
 function playSound(type) {
     if (!audioCtx) return;
-    const osc = audioCtx.createOscillator();
-    const gain = audioCtx.createGain();
-    osc.connect(gain);
-    gain.connect(audioCtx.destination);
-    const volume = (state.settings?.volume || 50) / 500; // Scale volume
-    gain.gain.setValueAtTime(volume, audioCtx.currentTime);
+    const volume = (state.settings?.volume || 50) / 500;
+    const soundSet = state.settings.soundSet || 'classic';
 
-    if (type === 'click') {
-        osc.frequency.setValueAtTime(800, audioCtx.currentTime);
-        osc.frequency.exponentialRampToValueAtTime(400, audioCtx.currentTime + 0.1);
-        gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.1);
+    const playOsc = (freqs, duration, type = 'sine') => {
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.type = type;
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+        gain.gain.setValueAtTime(volume, audioCtx.currentTime);
+        
+        freqs.forEach((f, i) => {
+            if (i === 0) osc.frequency.setValueAtTime(f, audioCtx.currentTime);
+            else osc.frequency.exponentialRampToValueAtTime(f, audioCtx.currentTime + (duration * i / freqs.length));
+        });
+
+        gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + duration);
         osc.start(audioCtx.currentTime);
-        osc.stop(audioCtx.currentTime + 0.1);
-    } else if (type === 'buy') {
-        osc.frequency.setValueAtTime(400, audioCtx.currentTime);
-        osc.frequency.exponentialRampToValueAtTime(800, audioCtx.currentTime + 0.1);
-        gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.1);
-        osc.start(audioCtx.currentTime);
-        osc.stop(audioCtx.currentTime + 0.1);
-    } else if (type === 'levelup') {
-        osc.frequency.setValueAtTime(500, audioCtx.currentTime);
-        osc.frequency.exponentialRampToValueAtTime(1000, audioCtx.currentTime + 0.3);
-        gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.3);
-        osc.start(audioCtx.currentTime);
-        osc.stop(audioCtx.currentTime + 0.3);
+        osc.stop(audioCtx.currentTime + duration);
+    };
+
+    if (soundSet === '8bit') {
+        if (type === 'click') playOsc([150, 300, 100], 0.1, 'square');
+        else if (type === 'buy') playOsc([200, 400, 600], 0.2, 'square');
+        else if (type === 'levelup') playOsc([400, 600, 800, 1000], 0.4, 'square');
+    } else if (soundSet === 'modern') {
+        if (type === 'click') playOsc([1000, 800], 0.05, 'triangle');
+        else if (type === 'buy') playOsc([600, 900], 0.15, 'triangle');
+        else if (type === 'levelup') playOsc([300, 600, 900], 0.3, 'triangle');
+    } else {
+        // Classic
+        if (type === 'click') playOsc([800, 400], 0.1);
+        else if (type === 'buy') playOsc([400, 800], 0.1);
+        else if (type === 'levelup') playOsc([500, 1000], 0.3);
     }
 }
 
@@ -161,7 +187,12 @@ function getVibesPerClick() {
         const upgrade = UPGRADES.find(u => u.id == id);
         if (upgrade) bonus += state.upgrades[id] * upgrade.clickBonus;
     }
-    return bonus;
+    
+    // Prestige bonuses
+    const skillBonus = 1 + (state.prestige.skills.clickMaster * 0.5);
+    const comboBonus = state.combo.multiplier;
+    
+    return bonus * skillBonus * comboBonus;
 }
 
 function getVibesPerSecond() {
@@ -170,7 +201,56 @@ function getVibesPerSecond() {
         const investment = INVESTMENTS.find(i => i.id == id);
         if (investment) income += state.investments[id] * investment.income;
     }
-    return income;
+    
+    // Prestige bonuses
+    const skillBonus = 1 + (state.prestige.skills.passiveIncome * 0.5);
+    
+    return income * skillBonus;
+}
+
+function performPrestige() {
+    if (state.level < 50) {
+        alert('Нужен как минимум 50 уровень для перерождения!');
+        return;
+    }
+    
+    const pointsToGain = Math.floor(state.level / 10);
+    if (confirm(`Вы получите ${pointsToGain} Очков Харизмы. Весь прогресс (кроме достижений и навыков) будет сброшен. Продолжить?`)) {
+        state.prestige.points += pointsToGain;
+        state.prestige.totalPoints += pointsToGain;
+        state.prestige.count++;
+        
+        // Reset progress
+        state.vibes = 0;
+        state.totalVibes = 0;
+        state.loyalty = 0;
+        state.level = 1;
+        state.clicks = 0;
+        state.upgrades = {};
+        state.investments = {};
+        
+        saveGame();
+        location.reload();
+    }
+}
+
+function buySkill(skillId) {
+    const costs = {
+        clickMaster: 1,
+        passiveIncome: 1,
+        luck: 2
+    };
+    
+    const cost = costs[skillId];
+    if (state.prestige.points >= cost) {
+        state.prestige.points -= cost;
+        state.prestige.skills[skillId]++;
+        playSound('buy');
+        saveGame();
+        updateUI();
+    } else {
+        alert('Недостаточно Очков Харизмы!');
+    }
 }
 
 function updateUI() {
@@ -182,6 +262,21 @@ function updateUI() {
     const loyaltyPercent = (state.loyalty / LOYALTY_FOR_LEVEL_UP) * 100;
     loyaltyPercentDisplay.textContent = Math.floor(loyaltyPercent) + '%';
     loyaltyFill.style.width = loyaltyPercent + '%';
+
+    // Update Prestige & Skills
+    const prestigePointsEl = document.getElementById('prestige-points');
+    if (prestigePointsEl) prestigePointsEl.textContent = state.prestige.points;
+    
+    const prestigeBtn = document.getElementById('prestige-btn');
+    if (prestigeBtn) {
+        prestigeBtn.disabled = state.level < 50;
+        prestigeBtn.className = state.level >= 50 ? 'prestige-btn active' : 'prestige-btn';
+    }
+
+    for (const skillId in state.prestige.skills) {
+        const el = document.getElementById(`skill-${skillId}-lvl`);
+        if (el) el.textContent = state.prestige.skills[skillId];
+    }
     
     // Проверяем, что индекс фото в пределах массива
     if (state.currentPhotoIndex >= PHOTOS.length) {
@@ -330,13 +425,71 @@ function addClickAnimation() {
     }, 100);
 }
 
+function updateCombo() {
+    const now = Date.now();
+    const diff = now - state.combo.lastClick;
+    
+    if (diff < 1000) {
+        state.combo.value = Math.min(state.combo.value + 2, 100);
+    } else {
+        state.combo.value = Math.max(state.combo.value - 1, 0);
+    }
+    
+    state.combo.multiplier = 1 + Math.floor(state.combo.value / 20);
+    
+    const comboFill = document.getElementById('combo-fill');
+    const comboText = document.getElementById('combo-text');
+    if (comboFill) comboFill.style.width = state.combo.value + '%';
+    if (comboText) comboText.textContent = 'x' + state.combo.multiplier;
+    
+    if (state.combo.value >= 100) {
+        document.getElementById('combo-meter').classList.add('frenzy');
+        document.getElementById('altushka-img').style.filter = `hue-rotate(${now % 360}deg) brightness(1.2)`;
+    } else {
+        document.getElementById('combo-meter').classList.remove('frenzy');
+        document.getElementById('altushka-img').style.filter = 'none';
+    }
+}
+
+function spawnGoldenAltushka() {
+    const golden = document.createElement('div');
+    golden.className = 'golden-altushka';
+    golden.innerHTML = '✨👧✨';
+    golden.style.left = Math.random() * 80 + 10 + '%';
+    golden.style.top = Math.random() * 80 + 10 + '%';
+    
+    golden.onclick = () => {
+        const bonus = getVibesPerSecond() * 60 + 1000;
+        state.vibes += bonus;
+        state.totalVibes += bonus;
+        createFloatingNumber(window.innerWidth/2, window.innerHeight/2, bonus);
+        golden.remove();
+        playSound('levelup');
+    };
+    
+    document.body.appendChild(golden);
+    setTimeout(() => golden.remove(), 5000);
+}
+
 clickButton.onclick = (e) => {
     initAudio();
-    const vpc = getVibesPerClick();
+    
+    // Luck check
+    let multiplier = 1;
+    if (state.prestige.skills.luck > 0) {
+        if (Math.random() < (state.prestige.skills.luck * 0.05)) {
+            multiplier = 10;
+        }
+    }
+
+    const vpc = getVibesPerClick() * multiplier;
     state.vibes += vpc;
     state.totalVibes += vpc;
     state.clicks++;
     state.loyalty += LOYALTY_PER_CLICK;
+    
+    state.combo.lastClick = Date.now();
+    updateCombo();
     
     if (state.loyalty >= LOYALTY_FOR_LEVEL_UP) {
         state.loyalty %= LOYALTY_FOR_LEVEL_UP;
@@ -363,6 +516,17 @@ clickButton.onclick = (e) => {
 // Game loop (1s)
 setInterval(() => {
     state.stats.timePlayed++;
+    
+    // Combo decay
+    if (Date.now() - state.combo.lastClick > 1000) {
+        updateCombo();
+    }
+
+    // Random events
+    if (Math.random() < 0.01) { // 1% chance every second
+        spawnGoldenAltushka();
+    }
+
     const vps = getVibesPerSecond();
     if (vps > 0) {
         state.vibes += vps;
@@ -400,8 +564,8 @@ window.onclick = (e) => {
 };
 
 // Theme
-themeToggleBtn.onclick = () => {
-    state.theme = state.theme === 'light' ? 'dark' : 'light';
+themeSelect.onchange = (e) => {
+    state.theme = e.target.value;
     document.body.className = state.theme;
     saveGame();
 };
@@ -419,6 +583,11 @@ particlesToggle.onchange = (e) => {
 
 numbersToggle.onchange = (e) => {
     state.settings.numbers = e.target.checked;
+    saveGame();
+};
+
+soundSetSelect.onchange = (e) => {
+    state.settings.soundSet = e.target.value;
     saveGame();
 };
 
@@ -492,11 +661,13 @@ function loadGame() {
             stats: { ...state.stats, ...loadedState.stats }
         };
         document.body.className = state.theme;
+        if (themeSelect) themeSelect.value = state.theme;
         
         // Update UI elements to match state
         if (volumeControl) volumeControl.value = state.settings.volume;
         if (particlesToggle) particlesToggle.checked = state.settings.particles;
         if (numbersToggle) numbersToggle.checked = state.settings.numbers;
+        if (soundSetSelect) soundSetSelect.value = state.settings.soundSet || 'classic';
     }
     updateUI();
 }

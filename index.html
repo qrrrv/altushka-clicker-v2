@@ -38,6 +38,10 @@
                     </div>
 
                     <div class="click-area">
+                        <div id="combo-meter" class="combo-meter">
+                            <div id="combo-fill" class="combo-fill"></div>
+                            <span id="combo-text">x1</span>
+                        </div>
                         <button id="click-button">
                             <img id="altushka-img" src="assets/IMG_20251226_184854_485.jpg" alt="Altushka">
                         </button>
@@ -61,6 +65,7 @@
                         <button class="tab-btn active" data-tab="upgrades">Улучшения</button>
                         <button class="tab-btn" data-tab="investments">Инвестиции</button>
                         <button class="tab-btn" data-tab="achievements">Достижения</button>
+                        <button class="tab-btn" data-tab="skills">Навыки</button>
                         <button class="tab-btn" data-tab="stats">Статистика</button>
                     </div>
 
@@ -74,6 +79,42 @@
 
                     <div id="achievements-tab" class="tab-content">
                         <div id="achievements-list" class="item-list"></div>
+                    </div>
+
+                    <div id="skills-tab" class="tab-content">
+                        <div class="prestige-info">
+                            <div class="prestige-header">
+                                <span class="prestige-label">Очки Харизмы: <span id="prestige-points">0</span></span>
+                                <button id="prestige-btn" class="prestige-btn" onclick="performPrestige()">Перерождение</button>
+                            </div>
+                            <p class="prestige-desc">Доступно с 50 уровня. Сбрасывает прогресс, давая очки для покупки навыков.</p>
+                        </div>
+                        <div id="skills-list" class="item-list">
+                            <div class="shop-item" onclick="buySkill('clickMaster')">
+                                <div class="item-icon">⚔️</div>
+                                <div class="item-info">
+                                    <span class="item-name">Мастер клика <span id="skill-clickMaster-lvl" class="item-level">0</span></span>
+                                    <span class="item-desc">+50% к силе клика</span>
+                                </div>
+                                <div class="item-cost">1 Очко</div>
+                            </div>
+                            <div class="shop-item" onclick="buySkill('passiveIncome')">
+                                <div class="item-icon">📈</div>
+                                <div class="item-info">
+                                    <span class="item-name">Пассивный доход <span id="skill-passiveIncome-lvl" class="item-level">0</span></span>
+                                    <span class="item-desc">+50% к доходу в сек</span>
+                                </div>
+                                <div class="item-cost">1 Очко</div>
+                            </div>
+                            <div class="shop-item" onclick="buySkill('luck')">
+                                <div class="item-icon">🍀</div>
+                                <div class="item-info">
+                                    <span class="item-name">Удача <span id="skill-luck-lvl" class="item-level">0</span></span>
+                                    <span class="item-desc">Шанс крит. клика (x10)</span>
+                                </div>
+                                <div class="item-cost">2 Очка</div>
+                            </div>
+                        </div>
                     </div>
 
                     <div id="stats-tab" class="tab-content">
@@ -140,7 +181,12 @@
             <div class="settings-container">
                 <div class="setting-item">
                     <label>Тема оформления</label>
-                    <button id="theme-toggle-btn" class="secondary-btn">Сменить тему 🌓</button>
+                    <select id="theme-select" class="settings-select">
+                        <option value="light">Светлая</option>
+                        <option value="dark">Темная</option>
+                        <option value="cyberpunk">Киберпанк</option>
+                        <option value="sakura">Сакура</option>
+                    </select>
                 </div>
                 <div class="setting-item">
                     <label>Громкость звука</label>
@@ -153,6 +199,14 @@
                 <div class="setting-item">
                     <label>Всплывающие числа</label>
                     <input type="checkbox" id="numbers-toggle" checked>
+                </div>
+                <div class="setting-item">
+                    <label>Набор звуков</label>
+                    <select id="sound-set-select" class="settings-select">
+                        <option value="classic">Классика</option>
+                        <option value="8bit">8-бит</option>
+                        <option value="modern">Модерн</option>
+                    </select>
                 </div>
                 <div class="setting-item">
                     <label>Промокод</label>
