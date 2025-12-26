@@ -18,6 +18,12 @@ const UPGRADES = [
     { id: 8, name: 'LED лента', icon: '💡', baseCost: 1800, clickBonus: 55 },
     { id: 9, name: 'Механика', icon: '⌨️', baseCost: 2500, clickBonus: 85 },
     { id: 10, name: 'Второй монитор', icon: '🖥️', baseCost: 3500, clickBonus: 130 },
+    { id: 11, name: 'Игровая консоль', icon: '🎮', baseCost: 5000, clickBonus: 200 },
+    { id: 12, name: 'Кулер для ПК', icon: '❄️', baseCost: 7000, clickBonus: 300 },
+    { id: 13, name: 'Графический планшет', icon: '✏️', baseCost: 10000, clickBonus: 450 },
+    { id: 14, name: 'Профессиональное кресло', icon: '👑', baseCost: 15000, clickBonus: 650 },
+    { id: 15, name: 'Смарт часы', icon: '⌚', baseCost: 20000, clickBonus: 900 },
+    { id: 16, name: 'Голосовой помощник', icon: '🤖', baseCost: 30000, clickBonus: 1300 },
 ];
 
 const INVESTMENTS = [
@@ -27,9 +33,15 @@ const INVESTMENTS = [
     { id: 4, name: 'YouTube канал', icon: '📺', baseCost: 1200, income: 9 },
     { id: 5, name: 'Twitch стрим', icon: '💜', baseCost: 2000, income: 17 },
     { id: 6, name: 'Интернет магазин', icon: '🛒', baseCost: 3500, income: 30 },
+    { id: 7, name: 'Instagram аккаунт', icon: '📸', baseCost: 5000, income: 50 },
+    { id: 8, name: 'Discord сервер', icon: '🎮', baseCost: 7500, income: 75 },
+    { id: 9, name: 'Блог на Medium', icon: '📝', baseCost: 10000, income: 110 },
+    { id: 10, name: 'Podcast', icon: '🎙️', baseCost: 15000, income: 160 },
+    { id: 11, name: 'Онлайн курсы', icon: '🎓', baseCost: 20000, income: 230 },
+    { id: 12, name: 'Мерч магазин', icon: '🛍️', baseCost: 30000, income: 330 },
 ];
 
-const LOYALTY_FOR_LEVEL_UP = 1500;
+const LOYALTY_FOR_LEVEL_UP = 1200;
 const LOYALTY_PER_CLICK = 8;
 
 let state = {
