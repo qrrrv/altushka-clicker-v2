@@ -134,6 +134,10 @@ function updateUI() {
     loyaltyPercentDisplay.textContent = Math.floor(loyaltyPercent) + '%';
     loyaltyFill.style.width = loyaltyPercent + '%';
     
+    // Проверяем, что индекс фото в пределах массива
+    if (state.currentPhotoIndex >= PHOTOS.length) {
+        state.currentPhotoIndex = state.currentPhotoIndex % PHOTOS.length;
+    }
     altushkaImg.src = PHOTOS[state.currentPhotoIndex];
     
     renderShop();
@@ -172,7 +176,7 @@ function renderShop() {
             <div class="item-icon">${inv.icon}</div>
             <div class="item-info">
                 <span class="item-name">${inv.name} <span class="item-level">Lvl ${level}</span></span>
-                <span class="item-desc">+${inv.income} в сек</span>
+                <span class="item-desc">+${inv.income.toFixed(1)} в сек</span>
             </div>
             <div class="item-cost">${formatNumber(cost)}</div>
         `;
@@ -219,6 +223,13 @@ function createFloatingNumber(x, y, val) {
     setTimeout(() => el.remove(), 1000);
 }
 
+function addClickAnimation() {
+    clickButton.style.transform = 'scale(0.95)';
+    setTimeout(() => {
+        clickButton.style.transform = 'scale(1)';
+    }, 100);
+}
+
 clickButton.onclick = (e) => {
     initAudio();
     const vpc = getVibesPerClick();
@@ -232,8 +243,10 @@ clickButton.onclick = (e) => {
         state.level++;
         state.currentPhotoIndex = (state.currentPhotoIndex + 1) % PHOTOS.length;
         playSound('levelup');
+        addClickAnimation();
     } else {
         playSound('click');
+        addClickAnimation();
     }
     
     const rect = clickButton.getBoundingClientRect();
