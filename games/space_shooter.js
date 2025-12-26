@@ -4,17 +4,20 @@ const SpaceShooterGame = {
     ctx: null,
     animationId: null,
     score: 0,
+    level: 1,
     
     player: {
         x: 0,
         y: 0,
         width: 40,
-        height: 40
+        height: 40,
+        shield: 0
     },
     
     bullets: [],
     enemies: [],
     powerups: [],
+    particles: [],
     
     lastEnemySpawn: 0,
     lastShoot: 0,
@@ -23,10 +26,13 @@ const SpaceShooterGame = {
     start(area) {
         this.active = true;
         this.score = 0;
+        this.level = 1;
         this.bullets = [];
         this.enemies = [];
         this.powerups = [];
+        this.particles = [];
         this.shootDelay = 300;
+        this.player.shield = 0;
         
         this.canvas = document.createElement('canvas');
         this.canvas.id = 'game-canvas';
@@ -43,7 +49,6 @@ const SpaceShooterGame = {
             this.player.x = e.clientX - rect.left;
             this.player.y = e.clientY - rect.top;
             
-            // Keep player in bounds
             if (this.player.x < 20) this.player.x = 20;
             if (this.player.x > this.canvas.width - 20) this.player.x = this.canvas.width - 20;
             if (this.player.y < 20) this.player.y = 20;
@@ -51,7 +56,6 @@ const SpaceShooterGame = {
         };
         
         this.canvas.addEventListener('mousemove', this.mouseHandler);
-        
         this.loop();
     },
     
@@ -60,19 +64,35 @@ const SpaceShooterGame = {
         this.active = false;
         cancelAnimationFrame(this.animationId);
         this.canvas.removeEventListener('mousemove', this.mouseHandler);
-        GameEngine.endGame(this.score, 20);
+        GameEngine.endGame(this.score, 20 + (this.level * 5));
+    },
+    
+    createExplosion(x, y, color) {
+        for (let i = 0; i < 10; i++) {
+            this.particles.push({
+                x, y,
+                vx: (Math.random() - 0.5) * 10,
+                vy: (Math.random() - 0.5) * 10,
+                life: 1.0,
+                color
+            });
+        }
     },
     
     spawnEnemy() {
         const now = Date.now();
-        const spawnRate = Math.max(300, 1000 - this.score);
+        // Difficulty increases with level
+        const spawnRate = Math.max(150, 1000 - (this.score / 2) - (this.level * 100));
         if (now - this.lastEnemySpawn > spawnRate) {
+            const type = Math.random() < (0.1 * this.level) ? 'fast' : 'normal';
             this.enemies.push({
                 x: Math.random() * (this.canvas.width - 30) + 15,
                 y: -30,
                 width: 30,
                 height: 30,
-                speed: 2 + Math.random() * 2 + (this.score / 500)
+                type: type,
+                speed: (type === 'fast' ? 5 : 2) + Math.random() * 2 + (this.score / 1000) + (this.level * 0.5),
+                hp: type === 'fast' ? 1 : Math.floor(1 + this.level / 3)
             });
             this.lastEnemySpawn = now;
         }
@@ -85,16 +105,32 @@ const SpaceShooterGame = {
                 x: this.player.x,
                 y: this.player.y - 20,
                 radius: 4,
-                speed: 8
+                speed: 10
             });
             this.lastShoot = now;
-            playSound('click');
+            if (typeof playSound === 'function') playSound('click');
         }
     },
     
     update() {
         this.shoot();
         this.spawnEnemy();
+        
+        // Level up logic
+        const nextLevelScore = this.level * 1000;
+        if (this.score >= nextLevelScore) {
+            this.level++;
+            if (typeof playSound === 'function') playSound('buy');
+        }
+        
+        // Update particles
+        for (let i = this.particles.length - 1; i >= 0; i--) {
+            const p = this.particles[i];
+            p.x += p.vx;
+            p.y += p.vy;
+            p.life -= 0.02;
+            if (p.life <= 0) this.particles.splice(i, 1);
+        }
         
         // Update bullets
         for (let i = this.bullets.length - 1; i >= 0; i--) {
@@ -112,8 +148,15 @@ const SpaceShooterGame = {
             const dy = e.y - this.player.y;
             const distance = Math.sqrt(dx * dx + dy * dy);
             if (distance < 30) {
-                this.stop();
-                return;
+                if (this.player.shield > 0) {
+                    this.player.shield--;
+                    this.enemies.splice(i, 1);
+                    this.createExplosion(e.x, e.y, '#f43f5e');
+                    continue;
+                } else {
+                    this.stop();
+                    return;
+                }
             }
             
             // Collision with bullets
@@ -123,19 +166,24 @@ const SpaceShooterGame = {
                 const bdy = e.y - b.y;
                 const bdist = Math.sqrt(bdx * bdx + bdy * bdy);
                 if (bdist < 20) {
-                    this.enemies.splice(i, 1);
+                    e.hp--;
                     this.bullets.splice(j, 1);
-                    this.score += 10;
-                    GameEngine.updateScore(this.score);
-                    
-                    // Spawn powerup
-                    if (Math.random() < 0.15) {
-                        this.powerups.push({
-                            x: e.x,
-                            y: e.y,
-                            radius: 12,
-                            type: 'speed'
-                        });
+                    if (e.hp <= 0) {
+                        this.createExplosion(e.x, e.y, '#f43f5e');
+                        this.enemies.splice(i, 1);
+                        this.score += 10 * this.level;
+                        GameEngine.updateScore(this.score);
+                        
+                        // Spawn powerup
+                        if (Math.random() < 0.15) {
+                            const types = ['speed', 'shield'];
+                            this.powerups.push({
+                                x: e.x,
+                                y: e.y,
+                                radius: 12,
+                                type: types[Math.floor(Math.random() * types.length)]
+                            });
+                        }
                     }
                     break;
                 }
@@ -154,9 +202,13 @@ const SpaceShooterGame = {
             const distance = Math.sqrt(dx * dx + dy * dy);
             
             if (distance < 30) {
-                this.shootDelay = Math.max(80, this.shootDelay - 30);
+                if (p.type === 'speed') {
+                    this.shootDelay = Math.max(60, this.shootDelay - 40);
+                } else if (p.type === 'shield') {
+                    this.player.shield = Math.min(3, this.player.shield + 1);
+                }
                 this.powerups.splice(i, 1);
-                playSound('buy');
+                if (typeof playSound === 'function') playSound('buy');
             } else if (p.y > this.canvas.height + 20) {
                 this.powerups.splice(i, 1);
             }
@@ -172,10 +224,31 @@ const SpaceShooterGame = {
         
         // Stars
         this.ctx.fillStyle = 'white';
-        for(let i=0; i<20; i++) {
-            const x = (Math.sin(Date.now() * 0.001 + i) * 0.5 + 0.5) * this.canvas.width;
-            const y = ((Date.now() * 0.1 + i * 100) % this.canvas.height);
-            this.ctx.fillRect(x, y, 2, 2);
+        for(let i=0; i<30; i++) {
+            const x = (Math.sin(Date.now() * 0.001 + i * 5) * 0.5 + 0.5) * this.canvas.width;
+            const y = ((Date.now() * (0.1 + (i%5)*0.05) + i * 100) % this.canvas.height);
+            this.ctx.fillRect(x, y, 1 + i%3, 1 + i%3);
+        }
+        
+        // Particles
+        this.particles.forEach(p => {
+            this.ctx.globalAlpha = p.life;
+            this.ctx.fillStyle = p.color;
+            this.ctx.fillRect(p.x - 2, p.y - 2, 4, 4);
+        });
+        this.ctx.globalAlpha = 1.0;
+        
+        // Player Shield
+        if (this.player.shield > 0) {
+            this.ctx.strokeStyle = '#38bdf8';
+            this.ctx.lineWidth = 2;
+            this.ctx.beginPath();
+            this.ctx.arc(this.player.x, this.player.y, 35, 0, Math.PI * 2);
+            this.ctx.stroke();
+            this.ctx.globalAlpha = 0.2;
+            this.ctx.fillStyle = '#38bdf8';
+            this.ctx.fill();
+            this.ctx.globalAlpha = 1.0;
         }
         
         // Player
@@ -199,27 +272,39 @@ const SpaceShooterGame = {
         });
         
         // Enemies
-        this.ctx.fillStyle = '#f43f5e';
         this.enemies.forEach(e => {
+            this.ctx.fillStyle = e.type === 'fast' ? '#f97316' : '#f43f5e';
             this.ctx.beginPath();
             this.ctx.moveTo(e.x, e.y + 15);
             this.ctx.lineTo(e.x - 15, e.y - 15);
             this.ctx.lineTo(e.x + 15, e.y - 15);
             this.ctx.closePath();
             this.ctx.fill();
+            
+            // HP bar for tough enemies
+            if (e.hp > 1) {
+                this.ctx.fillStyle = '#4ade80';
+                this.ctx.fillRect(e.x - 15, e.y - 25, 30 * (e.hp / Math.floor(1 + this.level / 3)), 4);
+            }
         });
         
         // Powerups
         this.powerups.forEach(p => {
-            this.ctx.fillStyle = '#4ade80';
+            this.ctx.fillStyle = p.type === 'speed' ? '#4ade80' : '#38bdf8';
             this.ctx.beginPath();
             this.ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
             this.ctx.fill();
             this.ctx.fillStyle = 'white';
             this.ctx.font = 'bold 12px Arial';
             this.ctx.textAlign = 'center';
-            this.ctx.fillText('⚡', p.x, p.y + 4);
+            this.ctx.fillText(p.type === 'speed' ? '⚡' : '🛡️', p.x, p.y + 4);
         });
+        
+        // Level Display
+        this.ctx.fillStyle = 'white';
+        this.ctx.font = 'bold 20px Arial';
+        this.ctx.textAlign = 'left';
+        this.ctx.fillText(`Уровень: ${this.level}`, 20, 40);
     },
     
     loop() {
