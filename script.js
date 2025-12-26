@@ -82,7 +82,6 @@ const altushkaImg = document.getElementById('altushka-img');
 const floatingNumbersContainer = document.getElementById('floating-numbers');
 const upgradesList = document.getElementById('upgrades-list');
 const investmentsList = document.getElementById('investments-list');
-const themeToggle = document.getElementById('theme-toggle');
 const resetBtn = document.getElementById('reset-game');
 const tabBtns = document.querySelectorAll('.tab-btn');
 const tabContents = document.querySelectorAll('.tab-content');
@@ -95,6 +94,12 @@ const statUpgrades = document.getElementById('stat-upgrades');
 const statInvestments = document.getElementById('stat-investments');
 const statAchievements = document.getElementById('stat-achievements');
 const statTime = document.getElementById('stat-time');
+const profileRank = document.getElementById('profile-rank');
+
+const settingsModal = document.getElementById('settings-modal');
+const openSettingsBtn = document.getElementById('open-settings');
+const closeSettingsBtn = document.getElementById('close-settings');
+const themeToggleBtn = document.getElementById('theme-toggle-btn');
 
 const volumeControl = document.getElementById('volume-control');
 const particlesToggle = document.getElementById('particles-toggle');
@@ -202,6 +207,17 @@ function updateStatsUI() {
     const mins = Math.floor((state.stats.timePlayed % 3600) / 60);
     const secs = state.stats.timePlayed % 60;
     statTime.textContent = `${hours > 0 ? hours + 'ч ' : ''}${mins > 0 ? mins + 'м ' : ''}${secs}с`;
+
+    // Update Rank
+    if (profileRank) {
+        let rank = 'Новичок';
+        if (state.level >= 50) rank = 'Легенда';
+        else if (state.level >= 30) rank = 'Мастер';
+        else if (state.level >= 20) rank = 'Профи';
+        else if (state.level >= 10) rank = 'Опытный';
+        else if (state.level >= 5) rank = 'Любитель';
+        profileRank.textContent = rank;
+    }
 }
 
 function renderShop() {
@@ -376,8 +392,15 @@ tabBtns.forEach(btn => {
     };
 });
 
+// Modal Logic
+openSettingsBtn.onclick = () => settingsModal.style.display = 'block';
+closeSettingsBtn.onclick = () => settingsModal.style.display = 'none';
+window.onclick = (e) => {
+    if (e.target === settingsModal) settingsModal.style.display = 'none';
+};
+
 // Theme
-themeToggle.onclick = () => {
+themeToggleBtn.onclick = () => {
     state.theme = state.theme === 'light' ? 'dark' : 'light';
     document.body.className = state.theme;
     saveGame();
