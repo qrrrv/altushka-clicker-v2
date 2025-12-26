@@ -24,6 +24,8 @@ const UPGRADES = [
     { id: 14, name: 'Профессиональное кресло', icon: '👑', baseCost: 15000, clickBonus: 650 },
     { id: 15, name: 'Смарт часы', icon: '⌚', baseCost: 20000, clickBonus: 900 },
     { id: 16, name: 'Голосовой помощник', icon: '🤖', baseCost: 30000, clickBonus: 1300 },
+    { id: 17, name: 'VR Шлем', icon: '🥽', baseCost: 50000, clickBonus: 2000 },
+    { id: 18, name: 'Игровой сервер', icon: '🖥️', baseCost: 100000, clickBonus: 5000 },
 ];
 
 const INVESTMENTS = [
@@ -39,6 +41,8 @@ const INVESTMENTS = [
     { id: 10, name: 'Podcast', icon: '🎙️', baseCost: 15000, income: 160 },
     { id: 11, name: 'Онлайн курсы', icon: '🎓', baseCost: 20000, income: 230 },
     { id: 12, name: 'Мерч магазин', icon: '🛍️', baseCost: 30000, income: 330 },
+    { id: 13, name: 'Криптоферма', icon: '⛏️', baseCost: 75000, income: 800 },
+    { id: 14, name: 'Медиахолдинг', icon: '🏢', baseCost: 200000, income: 2500 },
 ];
 
 const LOYALTY_FOR_LEVEL_UP = 1200;
@@ -53,6 +57,7 @@ let state = {
     currentPhotoIndex: 0,
     upgrades: {}, // id: level
     investments: {}, // id: level
+    achievements: [],
     theme: 'light'
 };
 
@@ -153,6 +158,7 @@ function updateUI() {
     altushkaImg.src = PHOTOS[state.currentPhotoIndex];
     
     renderShop();
+    if (window.renderAchievements) window.renderAchievements(state);
 }
 
 function renderShop() {
@@ -235,6 +241,27 @@ function createFloatingNumber(x, y, val) {
     setTimeout(() => el.remove(), 1000);
 }
 
+function createParticles(x, y) {
+    for (let i = 0; i < 8; i++) {
+        const p = document.createElement('div');
+        p.className = 'particle';
+        const size = Math.random() * 10 + 5;
+        p.style.width = size + 'px';
+        p.style.height = size + 'px';
+        p.style.background = `hsl(${Math.random() * 360}, 70%, 60%)`;
+        p.style.left = x + 'px';
+        p.style.top = y + 'px';
+        
+        const dx = (Math.random() - 0.5) * 200;
+        const dy = (Math.random() - 0.5) * 200;
+        p.style.setProperty('--dx', dx + 'px');
+        p.style.setProperty('--dy', dy + 'px');
+        
+        floatingNumbersContainer.appendChild(p);
+        setTimeout(() => p.remove(), 600);
+    }
+}
+
 function addClickAnimation() {
     clickButton.style.transform = 'scale(0.95)';
     setTimeout(() => {
@@ -262,8 +289,12 @@ clickButton.onclick = (e) => {
     }
     
     const rect = clickButton.getBoundingClientRect();
-    createFloatingNumber(e.clientX - rect.left, e.clientY - rect.top, vpc);
+    const x = e.clientX - rect.left;
+    const y = e.clientY - rect.top;
+    createFloatingNumber(x, y, vpc);
+    createParticles(x, y);
     
+    if (window.checkAchievements) window.checkAchievements(state);
     updateUI();
     saveGame();
 };
@@ -283,6 +314,7 @@ setInterval(() => {
             state.currentPhotoIndex = (state.currentPhotoIndex + 1) % PHOTOS.length;
         }
         
+        if (window.checkAchievements) window.checkAchievements(state);
         updateUI();
         saveGame();
     }

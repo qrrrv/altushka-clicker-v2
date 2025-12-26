@@ -247,8 +247,8 @@ header {
 
 .item-list {
     display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 12px;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
 }
 
 .shop-item {
@@ -335,6 +335,55 @@ header {
     text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
 }
 
+.particle {
+    position: absolute;
+    pointer-events: none;
+    border-radius: 50%;
+    z-index: 99;
+    animation: particleFade 0.6s ease-out forwards;
+}
+
+@keyframes particleFade {
+    0% { transform: translate(0, 0) scale(1); opacity: 1; }
+    100% { transform: translate(var(--dx), var(--dy)) scale(0); opacity: 0; }
+}
+
+.achievement-toast {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    background: var(--card-bg);
+    border: 2px solid var(--accent);
+    padding: 15px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    box-shadow: var(--shadow);
+    transform: translateX(120%);
+    transition: transform 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    z-index: 1000;
+}
+
+.achievement-toast.show {
+    transform: translateX(0);
+}
+
+.achievement-icon {
+    font-size: 2rem;
+}
+
+.achievement-info h4 {
+    margin: 0;
+    color: var(--accent);
+}
+
+.achievement-info p {
+    margin: 5px 0 0;
+    font-size: 0.8rem;
+    color: var(--text-muted);
+}
+
 @keyframes floatUp {
     0% { 
         transform: translateY(0) scale(1);
@@ -374,7 +423,27 @@ header {
 
 @media (max-width: 768px) {
     .item-list {
-        grid-template-columns: 1fr;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 8px;
+    }
+    
+    .shop-item {
+        padding: 10px;
+        min-height: 120px;
+    }
+
+    .item-icon {
+        width: 40px;
+        height: 40px;
+        font-size: 1.5rem;
+    }
+
+    .item-name {
+        font-size: 0.8rem;
+    }
+
+    .item-desc {
+        font-size: 0.65rem;
     }
     
     .shop-section {
